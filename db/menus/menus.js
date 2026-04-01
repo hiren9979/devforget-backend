@@ -31,9 +31,9 @@ const getMenusByIdDB = async (workspaceId, id) => {
 };
 
 // CREATE
-const createMenusDB = async (workspaceId, payload) => {
+const createMenusDB = async (data) => {
   try {
-    const { name, tableName, icon, parentId, sortOrder } = payload;
+    const { name, tableName, icon, parentId, sortOrder, workspaceId } = data;
     
     const query = `INSERT INTO menus (id, workspaceId, name, tableName, icon, parentId, sortOrder) VALUES (UUID(), ?, ?, ?, ?, ?, ?)`;
     const result = await executeQuery(query, [
@@ -48,10 +48,8 @@ const createMenusDB = async (workspaceId, payload) => {
     if (result.affectedRows != 1) {
       return Responses.badRequest;
     }
-
-    // Return the created menu data
-    const createdMenu = await executeQuery("SELECT * FROM menus WHERE id = LAST_INSERT_ID()");
-    return createdMenu[0];
+    
+    return Responses.success;
   } catch (error) {
     console.error(error);
     return Responses.tryAgain;
@@ -59,9 +57,9 @@ const createMenusDB = async (workspaceId, payload) => {
 };
 
 // UPDATE BY ID
-const updateMenusByIdDB = async (workspaceId, id, payload) => {
+const updateMenusByIdDB = async (workspaceId, id, data) => {
   try {
-    const { name, tableName, icon, parentId, sortOrder } = payload;
+    const { name, tableName, icon, parentId, sortOrder } = data;
     
     const query = `UPDATE menus SET name = ?, tableName = ?, icon = ?, parentId = ?, sortOrder = ? WHERE id = ? AND workspaceId = ? AND isDeleted = 0`;
     const result = await executeQuery(query, [

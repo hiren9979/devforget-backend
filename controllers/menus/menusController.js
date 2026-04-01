@@ -58,9 +58,13 @@ const createMenusData = async (req, res) => {
     const data = {
       name : req.body.name,
       tableName: req.body.tableName,
+      workspaceId: workspaceId,
+      icon: req.body.icon || null,
+      parentId: req.body.parentId || null,
+      sortOrder: req.body.sortOrder || 0
     }
 
-    const response = await createMenusDB(workspaceId, payload);
+    const response = await createMenusDB(data);
     return sendResponse(req, res, 201, response);
   } catch (error) {
     return sendResponse(req, res, 500, "Failed to create data");
