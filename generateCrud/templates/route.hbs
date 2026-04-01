@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+const {{module}}Controller = require('../../controllers/{{module}}/{{module}}Controller');
+
+router.get('/', {{module}}Controller.getAll{{pascalCase module}}Data);
+router.get('/:id', {{module}}Controller.get{{pascalCase module}}DataById);
+router.post('/create', {{module}}Controller.create{{pascalCase module}}Data);
+router.put('/:id', {{module}}Controller.update{{pascalCase module}}DataById);
+router.delete('/:id', {{module}}Controller.delete{{pascalCase module}}DataById);
+
+module.exports = router;

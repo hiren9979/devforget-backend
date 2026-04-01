@@ -1,0 +1,97 @@
+const { Responses } = require('../../utils/responses');
+const { executeQuery } = require('../../config/db');
+
+// GET ALL
+const getAll{{pascalCase module}}DB = async (userId) => {
+  try {
+    const query = "SELECT * FROM {{camelCase module}} WHERE userId = ? AND isDeleted = 0";
+    const data = await executeQuery(query, [userId]);
+    return data || [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+// GET BY ID
+const get{{pascalCase module}}ByIdDB = async (userId, id) => {
+  try {
+    const query = "SELECT * FROM {{camelCase module}} WHERE id = ? AND userId = ? AND isDeleted = 0";
+    const data = await executeQuery(query, [id, userId]);
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data[0];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+// CREATE
+const create{{pascalCase module}}DB = async (userId, payload) => {
+  try {
+    const fields = Object.keys(payload).join(', ');
+    const placeholders = Object.keys(payload).map(() => '?').join(', ');
+    const values = Object.values(payload);
+    
+    const query = `INSERT INTO {{camelCase module}} (id, userId, ${fields}) VALUES (UUID(), ?, ${placeholders})`;
+    const result = await executeQuery(query, [userId, ...values]);
+
+    if (result.affectedRows != 1) {
+      return Responses.badRequest;
+    }
+
+    return Responses.success;
+  } catch (error) {
+    console.error(error);
+    return Responses.tryAgain;
+  }
+};
+
+// UPDATE BY ID
+const update{{pascalCase module}}ByIdDB = async (userId, id, payload) => {
+  try {
+    const setClause = Object.keys(payload).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(payload);
+    
+    const query = `UPDATE {{camelCase module}} SET ${setClause} WHERE id = ? AND userId = ? AND isDeleted = 0`;
+    const result = await executeQuery(query, [...values, id, userId]);
+
+    if (result.affectedRows === 0) {
+      return Responses.notFound;
+    }
+
+    return Responses.success;
+  } catch (error) {
+    console.error(error);
+    return Responses.tryAgain;
+  }
+};
+
+// DELETE BY ID
+const delete{{pascalCase module}}ByIdDB = async (userId, id) => {
+  try {
+    const query = "UPDATE {{camelCase module}} SET isDeleted = 1 WHERE id = ? AND userId = ? AND isDeleted = 0";
+    const result = await executeQuery(query, [id, userId]);
+
+    if (result.affectedRows === 0) {
+      return Responses.notFound;
+    }
+
+    return Responses.success;
+  } catch (error) {
+    console.error(error);
+    return Responses.tryAgain;
+  }
+};
+
+module.exports = {
+  getAll{{pascalCase module}}DB,
+  get{{pascalCase module}}ByIdDB,
+  create{{pascalCase module}}DB,
+  update{{pascalCase module}}ByIdDB,
+  delete{{pascalCase module}}ByIdDB,
+};

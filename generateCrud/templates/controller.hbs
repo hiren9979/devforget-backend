@@ -1,0 +1,77 @@
+const {
+  getAll{{pascalCase module}}DB,
+  get{{pascalCase module}}ByIdDB,
+  create{{pascalCase module}}DB,
+  update{{pascalCase module}}ByIdDB,
+  delete{{pascalCase module}}ByIdDB
+} = require('../../db/{{module}}/{{module}}');
+
+const { sendResponse } = require('../../utils/sendResponse');
+
+// GET /api/{{module}}
+const getAll{{pascalCase module}}Data = async (req, res) => {
+  try {
+    const data = await getAll{{pascalCase module}}DB(req.user.id);
+    return sendResponse(req, res, 200, data);
+  } catch (error) {
+    return sendResponse(req, res, 500, "Failed to fetch data");
+  }
+};
+
+// GET /api/{{module}}/:id
+const get{{pascalCase module}}DataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await get{{pascalCase module}}ByIdDB(req.user.id, id);
+
+    if (!data) {
+      return sendResponse(req, res, 404, "Data not found");
+    }
+
+    return sendResponse(req, res, 200, data);
+  } catch (error) {
+    return sendResponse(req, res, 500, "Failed to fetch data by ID");
+  }
+};
+
+// POST /api/{{module}}
+const create{{pascalCase module}}Data = async (req, res) => {
+  try {
+    const payload = req.body;
+    await create{{pascalCase module}}DB(req.user.id, payload);
+    return sendResponse(req, res, 201, "Data created successfully");
+  } catch (error) {
+    return sendResponse(req, res, 500, "Failed to create data");
+  }
+};
+
+// PUT /api/{{module}}/:id
+const update{{pascalCase module}}DataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const payload = req.body;
+    await update{{pascalCase module}}ByIdDB(req.user.id, id, payload);
+    return sendResponse(req, res, 200, "Data updated successfully");
+  } catch (error) {
+    return sendResponse(req, res, 500, "Failed to update data");
+  }
+};
+
+// DELETE /api/{{module}}/:id
+const delete{{pascalCase module}}DataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await delete{{pascalCase module}}ByIdDB(req.user.id, id);
+    return sendResponse(req, res, 200, "Data deleted successfully");
+  } catch (error) {
+    return sendResponse(req, res, 500, "Failed to delete data");
+  }
+};
+
+module.exports = {
+  getAll{{pascalCase module}}Data,
+  get{{pascalCase module}}DataById,
+  create{{pascalCase module}}Data,
+  update{{pascalCase module}}DataById,
+  delete{{pascalCase module}}DataById
+};
