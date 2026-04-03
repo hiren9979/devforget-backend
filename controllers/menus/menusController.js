@@ -11,7 +11,7 @@ const { sendResponse } = require('../../utils/sendResponse');
 // GET /api/menus
 const getAllMenusData = async (req, res) => {
   try {
-    const workspaceId = req.body.workspaceId;
+    const workspaceId = req.headers.workspaceid;
     
     if (!workspaceId) {
       return sendResponse(req, res, 400, "Workspace ID is required");
@@ -28,7 +28,7 @@ const getAllMenusData = async (req, res) => {
 const getMenusDataById = async (req, res) => {
   try {
     const { id } = req.params;
-    const workspaceId = req.body.workspaceId;
+    const workspaceId = req.headers.workspaceid;
     
     if (!workspaceId) {
       return sendResponse(req, res, 400, "Workspace ID is required");
@@ -49,7 +49,7 @@ const getMenusDataById = async (req, res) => {
 // POST /api/menus
 const createMenusData = async (req, res) => {
   try {
-    const workspaceId = req.body.workspaceId;
+    const workspaceId = req.body.workspaceid;
     
     if (!workspaceId) {
       return sendResponse(req, res, 400, "Workspace ID is required");
@@ -65,9 +65,9 @@ const createMenusData = async (req, res) => {
     }
 
     const response = await createMenusDB(data);
-    return sendResponse(req, res, 201, response);
+    return sendResponse(req, res, response.status, "Failed to create menu");
   } catch (error) {
-    return sendResponse(req, res, 500, "Failed to create data");
+    return sendResponse(req, res, 500, "Failed to create menu");
   }
 };
 
@@ -75,7 +75,7 @@ const createMenusData = async (req, res) => {
 const updateMenusDataById = async (req, res) => {
   try {
     const { id } = req.params;
-    const workspaceId = req.body.workspaceId;
+    const workspaceId = req.headers.workspaceid;
     
     if (!workspaceId) {
       return sendResponse(req, res, 400, "Workspace ID is required");
@@ -85,7 +85,7 @@ const updateMenusDataById = async (req, res) => {
     const response = await updateMenusByIdDB(workspaceId, id, payload);
     return sendResponse(req, res, 200, response);
   } catch (error) {
-    return sendResponse(req, res, 500, "Failed to update data");
+    return sendResponse(req, res, 500, "Failed to update menu");
   }
 };
 
@@ -93,7 +93,7 @@ const updateMenusDataById = async (req, res) => {
 const deleteMenusDataById = async (req, res) => {
   try {
     const { id } = req.params;
-    const workspaceId = req.body.workspaceId;
+    const workspaceId = req.headers.workspaceid;
     
     if (!workspaceId) {
       return sendResponse(req, res, 400, "Workspace ID is required");
@@ -102,7 +102,7 @@ const deleteMenusDataById = async (req, res) => {
     const response = await deleteMenusByIdDB(workspaceId, id);
     return sendResponse(req, res, 200, response);
   } catch (error) {
-    return sendResponse(req, res, 500, "Failed to delete data");
+    return sendResponse(req, res, 500, "Failed to delete menu");
   }
 };
 
