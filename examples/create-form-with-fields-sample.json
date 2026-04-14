@@ -1,0 +1,136 @@
+{
+  "menuId": "your-menu-id-here",
+  "name": "User Registration Form",
+  "tableName": "user_registrations",
+  "fields": [
+    {
+      "fieldName": "firstName",
+      "fieldLabel": "First Name",
+      "fieldType": "text",
+      "isRequired": 1,
+      "isUnique": 0,
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "First name is required"
+        },
+        {
+          "validationType": "minLength",
+          "value": "2",
+          "errorMessage": "First name must be at least 2 characters"
+        },
+        {
+          "validationType": "maxLength",
+          "value": "50",
+          "errorMessage": "First name must not exceed 50 characters"
+        }
+      ]
+    },
+    {
+      "fieldName": "lastName",
+      "fieldLabel": "Last Name",
+      "fieldType": "text",
+      "isRequired": 1,
+      "isUnique": 0,
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "Last name is required"
+        },
+        {
+          "validationType": "minLength",
+          "value": "2",
+          "errorMessage": "Last name must be at least 2 characters"
+        }
+      ]
+    },
+    {
+      "fieldName": "email",
+      "fieldLabel": "Email Address",
+      "fieldType": "email",
+      "isRequired": 1,
+      "isUnique": 1,
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "Email is required"
+        },
+        {
+          "validationType": "regex",
+          "value": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+          "errorMessage": "Please enter a valid email address"
+        }
+      ]
+    },
+    {
+      "fieldName": "age",
+      "fieldLabel": "Age",
+      "fieldType": "number",
+      "isRequired": 1,
+      "isUnique": 0,
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "Age is required"
+        },
+        {
+          "validationType": "min",
+          "value": "18",
+          "errorMessage": "You must be at least 18 years old"
+        },
+        {
+          "validationType": "max",
+          "value": "120",
+          "errorMessage": "Please enter a valid age"
+        }
+      ]
+    },
+    {
+      "fieldName": "gender",
+      "fieldLabel": "Gender",
+      "fieldType": "select",
+      "isRequired": 1,
+      "isUnique": 0,
+      "options": {
+        "choices": [
+          {"value": "male", "label": "Male"},
+          {"value": "female", "label": "Female"},
+          {"value": "other", "label": "Other"}
+        ]
+      },
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "Please select your gender"
+        }
+      ]
+    },
+    {
+      "fieldName": "bio",
+      "fieldLabel": "Biography",
+      "fieldType": "textarea",
+      "isRequired": 0,
+      "isUnique": 0,
+      "validations": [
+        {
+          "validationType": "maxLength",
+          "value": "500",
+          "errorMessage": "Biography must not exceed 500 characters"
+        }
+      ]
+    },
+    {
+      "fieldName": "agreeToTerms",
+      "fieldLabel": "I agree to the terms and conditions",
+      "fieldType": "boolean",
+      "isRequired": 1,
+      "isUnique": 0,
+      "validations": [
+        {
+          "validationType": "required",
+          "errorMessage": "You must agree to the terms and conditions"
+        }
+      ]
+    }
+  ]
+}

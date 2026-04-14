@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "Create Form with Fields",
+    "description": "Test the enhanced form creation endpoint"
+  },
+  "method": "POST",
+  "header": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "workspaceid",
+      "value": "your-workspace-id-here"
+    }
+  ],
+  "body": {
+    "mode": "raw",
+    "raw": "{\n  \"menuId\": \"test-menu-123\",\n  \"name\": \"User Registration Form\",\n  \"tableName\": \"user_registrations\",\n  \"fields\": [\n    {\n      \"fieldName\": \"firstName\",\n      \"fieldLabel\": \"First Name\",\n      \"fieldType\": \"text\",\n      \"isRequired\": 1,\n      \"isUnique\": 0,\n      \"validations\": [\n        {\n          \"validationType\": \"required\",\n          \"errorMessage\": \"First name is required\"\n        },\n        {\n          \"validationType\": \"minLength\",\n          \"value\": \"2\",\n          \"errorMessage\": \"First name must be at least 2 characters\"\n        },\n        {\n          \"validationType\": \"maxLength\",\n          \"value\": \"50\",\n          \"errorMessage\": \"First name must not exceed 50 characters\"\n        }\n      ]\n    },\n    {\n      \"fieldName\": \"lastName\",\n      \"fieldLabel\": \"Last Name\",\n      \"fieldType\": \"text\",\n      \"isRequired\": 1,\n      \"isUnique\": 0,\n      \"validations\": [\n        {\n          \"validationType\": \"required\",\n          \"errorMessage\": \"Last name is required\"\n        },\n        {\n          \"validationType\": \"minLength\",\n          \"value\": \"2\",\n          \"errorMessage\": \"Last name must be at least 2 characters\"\n        }\n      ]\n    },\n    {\n      \"fieldName\": \"email\",\n      \"fieldLabel\": \"Email Address\",\n      \"fieldType\": \"email\",\n      \"isRequired\": 1,\n      \"isUnique\": 1,\n      \"validations\": [\n        {\n          \"validationType\": \"required\",\n          \"errorMessage\": \"Email is required\"\n        },\n        {\n          \"validationType\": \"regex\",\n          \"value\": \"^[\\\\w-\\\\.]+@([\\\\w-]+\\\\.)+[\\\\w-]{2,4}$\",\n          \"errorMessage\": \"Please enter a valid email address\"\n        }\n      ]\n    },\n    {\n      \"fieldName\": \"age\",\n      \"fieldLabel\": \"Age\",\n      \"fieldType\": \"number\",\n      \"isRequired\": 1,\n      \"isUnique\": 0,\n      \"validations\": [\n        {\n          \"validationType\": \"required\",\n          \"errorMessage\": \"Age is required\"\n        },\n        {\n          \"validationType\": \"min\",\n          \"value\": \"18\",\n          \"errorMessage\": \"You must be at least 18 years old\"\n        },\n        {\n          \"validationType\": \"max\",\n          \"value\": \"120\",\n          \"errorMessage\": \"Please enter a valid age\"\n        }\n      ]\n    },\n    {\n      \"fieldName\": \"gender\",\n      \"fieldLabel\": \"Gender\",\n      \"fieldType\": \"select\",\n      \"isRequired\": 1,\n      \"isUnique\": 0,\n      \"options\": {\n        \"choices\": [\n          {\"value\": \"male\", \"label\": \"Male\"},\n          {\"value\": \"female\", \"label\": \"Female\"},\n          {\"value\": \"other\", \"label\": \"Other\"}\n        ]\n      },\n      \"validations\": [\n        {\n          \"validationType\": \"required\",\n          \"errorMessage\": \"Please select your gender\"\n        }\n      ]\n    }\n  ]\n}"
+  },
+  "url": {
+    "raw": "{{base_url}}/api/forms",
+    "host": ["{{base_url}}"],
+    "path": ["api", "forms"]
+  }
+}

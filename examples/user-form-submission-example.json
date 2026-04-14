@@ -1,0 +1,103 @@
+{
+  "title": "User Form Submission API Examples",
+  "description": "Examples for the new user form submission endpoints",
+  "endpoints": {
+    "get_form": {
+      "method": "GET",
+      "url": "/api/forms/user/{formConfigId}",
+      "headers": {
+        "workspaceid": "your-workspace-id",
+        "Authorization": "Bearer your-jwt-token"
+      },
+      "description": "Get form configuration for user submission by formConfigId",
+      "success_response": {
+        "form": {
+          "id": "form-config-id",
+          "menuId": "menu-id",
+          "name": "User Registration",
+          "tableName": "user_registrations",
+          "status": "published",
+          "fields": [
+            {
+              "id": "field-id-1",
+              "fieldName": "firstName",
+              "fieldLabel": "First Name",
+              "fieldType": "text",
+              "isRequired": 1,
+              "isUnique": 0,
+              "validations": [
+                {
+                  "validationType": "required",
+                  "errorMessage": "First name is required"
+                }
+              ]
+            }
+          ]
+        },
+        "tableExists": true
+      }
+    },
+    "submit_form": {
+      "method": "POST",
+      "url": "/api/forms/user/{formConfigId}/submit",
+      "headers": {
+        "workspaceid": "your-workspace-id",
+        "Authorization": "Bearer your-jwt-token",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com",
+        "age": 25,
+        "gender": "male",
+        "newsletter": true
+      },
+      "description": "Submit form data (creates table if not exists)",
+      "success_response": {
+        "message": "Form submitted successfully",
+        "data": {
+          "id": "generated-record-id",
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john.doe@example.com",
+          "age": 25,
+          "gender": "male",
+          "newsletter": true,
+          "workspaceId": "workspace-id",
+          "createdAt": "2026-04-14T10:07:00.000Z",
+          "updatedAt": "2026-04-14T10:07:00.000Z"
+        }
+      }
+    }
+  },
+  "workflow": {
+    "step1": "GET /api/forms/user/{formConfigId} - Check if form exists and is published",
+    "step2": "Display form to user based on the field configuration",
+    "step3": "POST /api/forms/user/{formConfigId}/submit - Submit filled form data",
+    "step4": "System automatically creates table if it doesn't exist",
+    "step5": "Data is validated and inserted into the appropriate table"
+  },
+  "field_types_mapping": {
+    "text": "VARCHAR(255)",
+    "textarea": "TEXT",
+    "number": "INT",
+    "decimal": "DECIMAL(10,2)",
+    "boolean": "BOOLEAN",
+    "date": "DATE",
+    "datetime": "DATETIME",
+    "select": "VARCHAR(255)",
+    "multiselect": "VARCHAR(255)",
+    "file": "VARCHAR(500)",
+    "email": "VARCHAR(255)",
+    "phone": "VARCHAR(255)"
+  },
+  "validation_rules": {
+    "required": "Field must not be empty",
+    "minLength": "String must be at least N characters",
+    "maxLength": "String must not exceed N characters",
+    "min": "Number must be at least N",
+    "max": "Number must not exceed N",
+    "regex": "Value must match the regex pattern"
+  }
+}

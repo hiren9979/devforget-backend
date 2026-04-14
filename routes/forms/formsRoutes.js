@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const formsController = require('../../controllers/forms/formsController');
+const formDataController = require('../../controllers/formData/formDataController');
 const { authMiddleware } = require('../../middlewares/authMiddleware');
 const { adminMiddleware } = require('../../middlewares/adminMiddleware');
 
@@ -45,5 +46,13 @@ router.patch('/fields/validations/:id', adminMiddleware, formsController.updateF
 
 // DELETE /api/forms/fields/validations/:id - Delete validation rule (admin)
 router.delete('/fields/validations/:id', adminMiddleware, formsController.deleteFieldValidation);
+
+// USER FORM SUBMISSION ROUTES
+
+// GET /api/forms/user/:formConfigId - Get form for user submission by formConfigId
+router.get('/user/:formConfigId', formDataController.getFormForSubmission);
+
+// POST /api/forms/user/:formConfigId/submit - Submit form data
+router.post('/user/:formConfigId/submit', formDataController.submitFormData);
 
 module.exports = router;

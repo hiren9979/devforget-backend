@@ -1,5 +1,6 @@
 const { Responses } = require('../../utils/responses');
 const { executeQuery } = require('../../config/db');
+const { generateV4Uuid } = require('../../utils/common');
 
 // GET ALL FORM CONFIGS
 const getAllFormConfigsDB = async (workspaceId) => {
@@ -78,10 +79,28 @@ const getFormConfigWithFieldsDB = async (workspaceId, id) => {
     const fields = await executeQuery(fieldsQuery, [id, workspaceId]);
 
     // Parse validations JSON for each field
-    const processedFields = fields.map(field => ({
-      ...field,
-      validations: field.validations ? JSON.parse(field.validations) : []
-    }));
+    const processedFields = fields.map(field => {
+      let validations = [];
+      if (field.validations) {
+        try {
+          // Check if it's already a parsed object/array or a string
+          if (typeof field.validations === 'string') {
+            validations = JSON.parse(field.validations);
+          } else if (Array.isArray(field.validations)) {
+            validations = field.validations;
+          } else {
+            validations = [];
+          }
+        } catch (error) {
+          console.error('Error parsing validations:', error);
+          validations = [];
+        }
+      }
+      return {
+        ...field,
+        validations: validations
+      };
+    });
 
     return {
       ...formConfig[0],
@@ -97,15 +116,20 @@ const getFormConfigWithFieldsDB = async (workspaceId, id) => {
 const createFormConfigDB = async (data) => {
   try {
     const { menuId, workspaceId, name, tableName } = data;
+    const formConfigId = generateV4Uuid();
     
-    const query = `INSERT INTO formconfigs (id, menuId, workspaceId, name, tableName) VALUES (UUID(), ?, ?, ?, ?)`;
-    const result = await executeQuery(query, [menuId, workspaceId, name, tableName]);
+    const query = `INSERT INTO formconfigs (id, menuId, workspaceId, name, tableName) VALUES (?, ?, ?, ?, ?)`;
+    const result = await executeQuery(query, [formConfigId, menuId, workspaceId, name, tableName]);
 
     if (result.affectedRows != 1) {
       return Responses.badRequest;
     }
     
-    return Responses.success;
+    // Get the inserted form config
+    const insertedQuery = "SELECT * FROM formconfigs WHERE id = ?";
+    const insertedData = await executeQuery(insertedQuery, [formConfigId]);
+    
+    return insertedData[0];
   } catch (error) {
     console.error(error);
     return Responses.tryAgain;
@@ -167,12 +191,110 @@ const publishFormConfigDB = async (workspaceId, id) => {
   }
 };
 
+// CREATE FORM CONFIG WITH FIELDS (TRANSACTION)
+const createFormConfigWithFieldsDB = async (data) => {
+  try {
+    const { menuId, workspaceId, name, tableName, fields } = data;
+    const formConfigId = generateV4Uuid();
+    
+    // Start transaction
+    await executeQuery("START TRANSACTION");
+    
+    try {
+      // Create form config
+      const formQuery = `INSERT INTO formconfigs (id, menuId, workspaceId, name, tableName) VALUES (?, ?, ?, ?, ?)`;
+      const formResult = await executeQuery(formQuery, [formConfigId, menuId, workspaceId, name, tableName]);
+
+      if (formResult.affectedRows != 1) {
+        throw new Error("Failed to create form config");
+      }
+      
+      // Get the inserted form config
+      const insertedQuery = "SELECT * FROM formconfigs WHERE id = ?";
+      const insertedData = await executeQuery(insertedQuery, [formConfigId]);
+      const formConfig = insertedData[0];
+      
+      // Create fields if provided
+      if (fields && fields.length > 0) {
+        for (let i = 0; i < fields.length; i++) {
+          const field = fields[i];
+          const { fieldName, fieldLabel, fieldType, options, isRequired, isUnique, validations } = field;
+          
+          // Create form field
+          const fieldId = generateV4Uuid();
+          const fieldQuery = `INSERT INTO formfields (id, formConfigId, workspaceId, fieldName, fieldLabel, fieldType, options, isRequired, isUnique, sortOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+          const fieldResult = await executeQuery(fieldQuery, [
+            fieldId,
+            formConfigId,
+            workspaceId,
+            fieldName,
+            fieldLabel,
+            fieldType || 'text',
+            options ? JSON.stringify(options) : null,
+            isRequired || 0,
+            isUnique || 0,
+            i // sortOrder based on array index
+          ]);
+
+          if (fieldResult.affectedRows != 1) {
+            throw new Error(`Failed to create field: ${fieldName}`);
+          }
+          
+          // Get the inserted field
+          const insertedFieldQuery = "SELECT * FROM formfields WHERE id = ?";
+          const insertedFieldData = await executeQuery(insertedFieldQuery, [fieldId]);
+          const fieldData = insertedFieldData[0];
+          
+          // Create validations if provided
+          if (validations && validations.length > 0) {
+            for (const validation of validations) {
+              const { validationType, value, errorMessage } = validation;
+              const validationId = generateV4Uuid();
+              
+              const validationQuery = `INSERT INTO fieldvalidations (id, formFieldId, validationType, value, errorMessage) VALUES (?, ?, ?, ?, ?)`;
+              const validationResult = await executeQuery(validationQuery, [
+                validationId,
+                fieldData.id,
+                validationType,
+                value || null,
+                errorMessage
+              ]);
+
+              if (validationResult.affectedRows != 1) {
+                throw new Error(`Failed to create validation for field: ${fieldName}`);
+              }
+            }
+          }
+        }
+      }
+      
+      // Commit transaction
+      await executeQuery("COMMIT");
+      
+      // Return the complete form config with fields
+      const result = await getFormConfigWithFieldsDB(workspaceId, formConfig.id);
+      console.log(result);
+      return {...Responses.success, data: result};
+      
+    } catch (error) {
+      // Rollback on error
+      await executeQuery("ROLLBACK");
+      throw error;
+    }
+    
+  } catch (error) {
+    console.error(error);
+    return Responses.tryAgain;
+  }
+};
+
 module.exports = {
   getAllFormConfigsDB,
   getFormConfigByIdDB,
   getFormConfigByMenuIdDB,
   getFormConfigWithFieldsDB,
   createFormConfigDB,
+  createFormConfigWithFieldsDB,
   updateFormConfigByIdDB,
   deleteFormConfigByIdDB,
   publishFormConfigDB,

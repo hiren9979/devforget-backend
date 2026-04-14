@@ -4,6 +4,7 @@ const {
   getFormConfigByMenuIdDB,
   getFormConfigWithFieldsDB,
   createFormConfigDB,
+  createFormConfigWithFieldsDB,
   updateFormConfigByIdDB,
   deleteFormConfigByIdDB,
   publishFormConfigDB
@@ -34,16 +35,39 @@ const createFormConfig = async (req, res) => {
       return sendResponse(req, res, 400, "Workspace ID is required");
     }
     
+    const { menuId, name, tableName, fields } = req.body;
+    
+    // Validate required fields
+    if (!menuId || !name || !tableName) {
+      return sendResponse(req, res, 400, "menuId, name, and tableName are required");
+    }
+    
     const data = {
-      menuId: req.body.menuId,
-      workspaceId: workspaceId,
-      name: req.body.name,
-      tableName: req.body.tableName
+      menuId,
+      workspaceId,
+      name,
+      tableName,
+      fields: fields || [] // Default to empty array if not provided
     };
 
-    const response = await createFormConfigDB(data);
-    return sendResponse(req, res, response.statusCode, response.clientMessage);
+    let response;
+    
+    // Use the appropriate function based on whether fields are provided
+    if (fields && fields.length > 0) {
+      response = await createFormConfigWithFieldsDB(data);
+    } else {
+      response = await createFormConfigDB(data);
+    }
+    
+    // Check if response is an error object
+    if (response && response.statusCode) {
+      return sendResponse(req, res, response.statusCode, response.clientMessage);
+    }
+    
+    // Return the created form config (with fields if provided)
+    return sendResponse(req, res, 201, response);
   } catch (error) {
+    console.error('Error in createFormConfig:', error);
     return sendResponse(req, res, 500, "Failed to create form config");
   }
 };
@@ -70,7 +94,7 @@ const getFormConfigWithFields = async (req, res) => {
   }
 };
 
-// GET /api/forms/menu/:menuId - Get form config by menuId (auth)
+// GET /api/forms/menu/:menuId - Get form config by menuId with all fields (auth)
 const getFormConfigByMenuId = async (req, res) => {
   try {
     const { menuId } = req.params;
@@ -80,7 +104,15 @@ const getFormConfigByMenuId = async (req, res) => {
       return sendResponse(req, res, 400, "Workspace ID is required");
     }
     
-    const data = await getFormConfigByMenuIdDB(workspaceId, menuId);
+    // First get the form config by menuId
+    const formConfig = await getFormConfigByMenuIdDB(workspaceId, menuId);
+
+    if (!formConfig) {
+      return sendResponse(req, res, 404, "Form config not found");
+    }
+
+    // Then get the complete form config with all fields
+    const data = await getFormConfigWithFieldsDB(workspaceId, formConfig.id);
 
     if (!data) {
       return sendResponse(req, res, 404, "Form config not found");
@@ -88,6 +120,7 @@ const getFormConfigByMenuId = async (req, res) => {
 
     return sendResponse(req, res, 200, data);
   } catch (error) {
+    console.error('Error in getFormConfigByMenuId:', error);
     return sendResponse(req, res, 500, "Failed to fetch form config");
   }
 };
